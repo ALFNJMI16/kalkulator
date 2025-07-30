@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulator Cukai Industri</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .sidebar {
+      width: 240px;
+      height: 100vh;
+      position: fixed;
+      background-color: #2d3e50;
+      color: white;
+      padding: 20px;
+    }
+    .sidebar h3 { color: #aee2ff; }
+    .sidebar a {
+      display: block;
+      color: white;
+      padding: 10px 0;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #1b2a38;
+      border-radius: 5px;
+      padding-left: 10px;
+    }
+    .main-content {
+      margin-left: 260px;
+      padding: 40px;
+    }
+    .result-box {
+      background-color: #0d6efd;
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .result-box h1 { font-size: 40px; }
+    .form-label { font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h3><img src="https://img.icons8.com/ios-filled/50/ffffff/calculator.png" width="24"> PREMIUM</h3>
+  <hr style="border-color: #aee2ff;">
+  <p>MOD KALKULATOR</p>
+  <a href="main.html">UTAMA</a>
+  <a href="bangunan.html">BANGUNAN</a>
+  <a href="komersial.html">KOMERSIL (JPU)</a>
+  <a href="industri.html"><strong>INDUSTRI/KOMERSIL</strong></a>
+  <a href="pertanian.html">PERTANIAN</a>
+  <a href="lain.html">LAIN-LAIN</a>
+  <a href="summary.html">RINGKASAN</a>
+</div>
+
+<div class="main-content">
+  <h2 class="mb-4">INDUSTRI/KOMERSIL (JPPH)</h2>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-body">
+          <p>Masukkan elemen dan klik <strong>"Kira Premium Yang Dikenakan"</strong></p>
+
+          <div class="mb-3">
+            <label class="form-label">Nilaian Selepas Ubahsyarat (RM):</label>
+            <input type="number" class="form-control" id="ubahSyaratSebelum" value="0">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Nilaian Sebelum Ubahsyarat (RM):</label>
+            <input type="number" class="form-control" id="ubahSyaratSelepas" value="0">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Cukai (RM):</label>
+            <input type="number" class="form-control" id="cukaiTetap" value="0">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Premium Pek JPU (RM):</label>
+            <input type="number" class="form-control" id="jpuPremium" value="0">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Keluasan Tanah (meter persegi):</label>
+            <input type="number" class="form-control" id="keluasanTanah" placeholder="Contoh: 2500">
+          </div>
+
+          <!-- Start of Added Code -->
+          <div class="mb-3">
+            <label class="form-label">Bilangan Plot *</label>
+            <input type="number" id="bilPlotIndustri" class="form-control" value="1" min="1">
+          </div>
+          <!-- End of Added Code -->
+
+          <div class="mb-3">
+            <label class="form-label">Bayaran lain (WAJIB pilih semua):</label>
+            <div>
+              <div class="form-check"><input class="form-check-input" type="checkbox" name="jenisTambahanIndustri" value="30" checked> Permohonan Tanah - RM30.00</div>
+              <div class="form-check"><input class="form-check-input" type="checkbox" name="jenisTambahanIndustri" value="10" checked> Pelan - RM10.00</div>
+              <div class="form-check"><input class="form-check-input" type="checkbox" name="jenisTambahanIndustri" value="40" checked> Hakmilik Sementara - RM40.00</div>
+              <div class="form-check"><input class="form-check-input" type="checkbox" name="jenisTambahanIndustri" value="40" checked> Hakmilik Kekal - RM40.00</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Kadar Peratusan Premium Tambahan:</label>
+            <select class="form-select" id="kadarPeratus">
+              <option value="0">Tiada</option>
+              <option value="3">3%</option>
+              <option value="5">5%</option>
+              <option value="10">10%</option>
+              <option value="20">20%</option>
+            </select>
+          </div>
+
+          <button class="btn btn-success" onclick="kiraIndustri()">Kira Premium Yang Dikenakan</button>
+          <button class="btn btn-secondary ms-2" onclick="resetIndustri()">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="result-box mb-3">
+        <h5>PREMIUM YANG DIKENAKAN</h5>
+        <h1 id="jumlahIndustri">RM0.00</h1>
+      </div>
+      <div class="card">
+        <div class="card-body" id="butiranIndustri">
+          <p><strong>Kategori:</strong> -</p>
+          <p><strong>Jenis:</strong> -</p>
+          <p><strong>Keluasan:</strong> -</p>
+          <p><strong>Bilangan Plot:</strong> -</p>
+          <p><strong>Kadar Cukai Seunit:</strong> -</p>
+          <p><strong>Jumlah Cukai:</strong> -</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function kiraIndustri() {
+  const semuaCheckbox = document.querySelectorAll('input[name="jenisTambahanIndustri"]');
+  const checkboxesDipilih = document.querySelectorAll('input[name="jenisTambahanIndustri"]:checked');
+
+  if (checkboxesDipilih.length !== semuaCheckbox.length) {
+    alert("Sila tandakan semua bayaran wajib.");
+    return;
+  }
+
+  const nilaiSelepas = parseFloat(document.getElementById("ubahSyaratSebelum").value || 0);
+  const nilaiSebelum = parseFloat(document.getElementById("ubahSyaratSelepas").value || 0);
+  const peratus = parseFloat(document.getElementById("kadarPeratus").value || 0);
+  const cukaiTetap = parseFloat(document.getElementById("cukaiTetap").value || 0);
+  const jpuPremium = parseFloat(document.getElementById("jpuPremium").value || 0);
+  const keluasan = parseFloat(document.getElementById("keluasanTanah").value || 0);
+  const bilPlot = parseInt(document.getElementById("bilPlotIndustri").value || 1); // Get the new input value
+
+  const bezaNilai = nilaiSelepas - nilaiSebelum;
+  const bayaranWajib = [...checkboxesDipilih].reduce((sum, el) => sum + parseFloat(el.value), 0);
+  const asas = bezaNilai + (bayaranWajib * bilPlot); // Apply bilPlot to bayaranWajib
+  const premiumTambahan = (peratus / 100) * asas;
+  const jumlahAkhir = asas + premiumTambahan + (cukaiTetap * bilPlot) + (jpuPremium * bilPlot); // Apply bilPlot to cukaiTetap and jpuPremium
+
+  document.getElementById("jumlahIndustri").innerText = jumlahAkhir.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' });
+  document.getElementById("butiranIndustri").innerHTML = `
+    <p><strong>Kategori:</strong> Industri</p>
+    <p><strong>Jenis:</strong> Ubahsyarat</p>
+    <p><strong>Keluasan:</strong> ${keluasan.toFixed(2)} m²</p>
+    <p><strong>Bilangan Plot:</strong> ${bilPlot}</p> <!-- Display bilPlot -->
+    <p><strong>Kadar Premium Seunit:</strong></p>
+    <ul>
+      <li>Nilaian Selepas Ubahsyarat: RM ${nilaiSelepas.toFixed(2)}</li>
+      <li>Nilaian Sebelum Ubahsyarat: RM ${nilaiSebelum.toFixed(2)}</li>
+      <li>Bayaran Wajib: RM ${(bayaranWajib * bilPlot).toFixed(2)}</li> <!-- Display calculated value -->
+      <li>Cukai: RM ${(cukaiTetap * bilPlot).toFixed(2)}</li> <!-- Display calculated value -->
+      <li>Premium Pek JPU: RM ${(jpuPremium * bilPlot).toFixed(2)}</li> <!-- Display calculated value -->
+      <li>Premium Tambahan (${peratus}%): RM ${premiumTambahan.toFixed(2)}</li>
+    </ul>
+    <p><strong>Jumlah Cukai:</strong> RM ${jumlahAkhir.toFixed(2)}</p>
+  `;
+
+  // Simpan ke summary
+  simpanRingkasan("Industri", "Ubahsyarat", bilPlot, jumlahAkhir, jumlahAkhir, cukaiTetap * bilPlot, 0, 0, 0, keluasan, jpuPremium * bilPlot);
+}
+
+function resetIndustri() {
+  document.getElementById("ubahSyaratSebelum").value = 0;
+  document.getElementById("ubahSyaratSelepas").value = 0;
+  document.getElementById("cukaiTetap").value = 0;
+  document.getElementById("jpuPremium").value = 0;
+  document.getElementById("keluasanTanah").value = "";
+  document.getElementById("bilPlotIndustri").value = 1; // Reset the new input
+  document.getElementById("kadarPeratus").value = 0;
+  document.querySelectorAll('input[name="jenisTambahanIndustri"]').forEach(cb => cb.checked = true);
+  document.getElementById("jumlahIndustri").innerText = "RM0.00";
+  document.getElementById("butiranIndustri").innerHTML = `
+    <p><strong>Kategori:</strong> -</p>
+    <p><strong>Jenis:</strong> -</p>
+    <p><strong>Keluasan:</strong> -</p>
+    <p><strong>Bilangan Plot:</strong> -</p>
+    <p><strong>Kadar Premium Seunit:</strong> -</p>
+    <p><strong>Jumlah Premium:</strong> -</p>
+  `;
+}
+
+function simpanRingkasan(kategori, jenis, bilPlot, kadar, jumlah, cukai, tambahanTingkat, tambahanLuas, tingkatAsal, luasAsal, jpu) {
+  const data = JSON.parse(localStorage.getItem("summaryData")) || [];
+  data.push({ kategori, jenis, bilPlot, kadar, jumlah, cukai, tambahanTingkat, tambahanLuas, tingkatAsal, luasAsal, jpu });
+  localStorage.setItem("summaryData", JSON.stringify(data));
+}
+</script>
+
+</body>
+</html>

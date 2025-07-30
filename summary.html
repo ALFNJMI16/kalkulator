@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <title>Ringkasan Premium</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body { background-color: #f8f9fa; }
+    .sidebar {
+      width: 240px;
+      height: 100vh;
+      position: fixed;
+      background-color: #2d3e50;
+      color: white;
+      padding: 20px;
+    }
+    .sidebar h3 { color: #aee2ff; }
+    .sidebar a {
+      display: block;
+      color: white;
+      padding: 10px 0;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #1b2a38;
+      border-radius: 5px;
+      padding-left: 10px;
+    }
+    .main-content {
+      margin-left: 260px;
+      padding: 40px;
+    }
+    table th, table td {
+      vertical-align: middle;
+      font-size: 14px;
+    }
+    .btn-sm {
+      font-size: 12px;
+      padding: 3px 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h3><img src="https://img.icons8.com/ios-filled/50/ffffff/calculator.png" width="24"> PREMIUM</h3>
+  <hr style="border-color: #aee2ff;">
+  <p>MOD KALKULATOR</p>
+  <a href="main.html">UTAMA</a>
+  <a href="bangunan.html">BANGUNAN</a>
+  <a href="komersial.html">KOMERSIL (JPU)</a>
+  <a href="industri.html">INDUSTRI/KOMERSIL</a>
+  <a href="pertanian.html">PERTANIAN</a>
+  <a href="lain.html">LAIN-LAIN</a>
+  <a href="summary.html"><strong>RINGKASAN</strong></a>
+</div>
+
+<div class="main-content">
+  <h2 class="mb-4">Ringkasan Kiraan Premium</h2>
+
+  <div class="mb-4">
+    <label for="tajukPdf" class="form-label"><strong>Tajuk untuk PDF:</strong></label>
+    <input type="text" id="tajukPdf" class="form-control mb-3" placeholder="Contoh: Ringkasan Permohonan Lot Komersil">
+    <input type="text" id="pelanPraHitungan" class="form-control mb-2" placeholder="PELAN PRA-HITUNGAN NO.">
+    <input type="text" id="noFail" class="form-control mb-2" placeholder="NO. FAIL">
+    <input type="text" id="noPlot" class="form-control mb-2" placeholder="NO. PLOT">
+    <input type="text" id="luasKeseluruhan" class="form-control mb-2" placeholder="LUAS KESELURUHAN">
+    
+    <select id="mukim" class="form-select mb-2">
+      <option value="">-- Sila Pilih Mukim --</option>
+      <option value="KULAI">KULAI</option>
+      <option value="SEDENAK">SEDENAK</option>
+      <option value="BUKIT BATU">BUKIT BATU</option>
+      <option value="SENAI">SENAI</option>
+    </select>
+  
+    <input type="text" id="pemohon" class="form-control" placeholder="PEMOHON">
+  </div>
+
+  <div id="summaryContent">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle" id="summaryTable">
+        <thead class="table-dark" id="summaryTableHead"></thead>
+        <tbody id="summaryTableBody">
+          <tr><td colspan="12" class="text-center">Tiada data ringkasan tersedia.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Ruang Tandatangan -->
+    <div class="row mt-5 text-center">
+      <div class="col">
+        <p><strong>Disediakan:</strong></p>
+        <div style="border-bottom: 1px solid #000; margin: 40px auto 10px; width: 80%;"></div>
+      </div>
+      <div class="col">
+        <p><strong>Disemak:</strong></p>
+        <div style="border-bottom: 1px solid #000; margin: 40px auto 10px; width: 80%;"></div>
+      </div>
+      <div class="col">
+        <p><strong>Disahkan:</strong></p>
+        <div style="border-bottom: 1px solid #000; margin: 40px auto 10px; width: 80%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Butang -->
+  <button class="btn btn-primary mt-3" onclick="muatTurunPDF()">Muat Turun PDF</button>
+  <button class="btn btn-danger mt-3 ms-2" onclick="resetRingkasan()">Reset Ringkasan</button>
+  <button class="btn btn-secondary mt-3 ms-2" onclick="duplicateLastRekod()">Tambah Plot</button>
+</div>
+
+<script>
+function populateSummaryTable() {
+  const data = JSON.parse(localStorage.getItem("summaryData")) || [];
+  const tbody = document.getElementById("summaryTableBody");
+  const thead = document.getElementById("summaryTableHead");
+  tbody.innerHTML = "";
+  thead.innerHTML = "";
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="12" class="text-center">Tiada data ringkasan tersedia.</td></tr>';
+    return;
+  }
+
+  thead.innerHTML = `
+    <tr>
+      <th>Plot</th>
+      <th>Kategori</th>
+      <th>Tingkat/ Keluasan (Tambahan)</th>
+      <th>Jumlah Tingkat + Luas (m²)</th>
+      <th>Permohonan Tanah (RM)</th>
+      <th>Pelan (RM)</th>
+      <th>Hakmilik Sementara (RM)</th>
+      <th>Hakmilik Kekal (RM)</th>
+      <th>Premium Pek JPU (RM)</th>
+      <th>Cukai (RM)</th>
+      <th>Jumlah Premium (RM)</th>
+      <th>Tindakan</th>
+    </tr>`;
+
+  let rowNumber = 1;
+  let totals = { permohonan: 0, pelan: 0, hms: 0, hmk: 0, jpu: 0, cukai: 0, jumlah: 0 };
+
+  data.forEach((item, index) => {
+    const permohonan = 30.00, pelan = 10.00, hms = 40.00, hmk = 40.00;
+    const jpu = parseFloat(item.jpu || 0);
+    const cukai = parseFloat(item.cukai || 0);
+    const jumlah = parseFloat(item.jumlah || 0);
+    const kadarSeunit = parseFloat(item.kadar) || 0;
+    const tambahanTingkat = parseInt(item.tambahanTingkat || 0);
+    const tambahanLuas = parseFloat(item.tambahanLuas || 0);
+    const tingkatAsal = parseInt(item.tingkatAsal || 0);
+    const luasAsal = parseFloat(item.luasAsal || 0);
+    const bilPlot = parseInt(item.bilPlot || 1);
+
+    let kategoriPaparan = item.kategori || '-';
+
+    if (item.kategori === "LAIN-LAIN") {
+      kategoriPaparan = item.jenis;
+      if (bilPlot > 1 && kadarSeunit) {
+        kategoriPaparan += ` - ${kadarSeunit.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })} x ${bilPlot} plot`;
+      }
+    } else if (item.kategori !== "Industri" && item.kategori !== "Pertanian") {
+      kategoriPaparan += ` - ${kadarSeunit.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}`;
+      if (bilPlot > 1) {
+        kategoriPaparan += ` x ${bilPlot} plot`;
+      }
+    }
+
+    let tambahanText = "-";
+    if (tambahanTingkat > 0 || tambahanLuas > 0) {
+      let arr = [];
+      if (tambahanTingkat > 0) arr.push(`${tambahanTingkat} tingkat`);
+      if (tambahanLuas > 0) arr.push(`${tambahanLuas.toLocaleString('ms-MY')} m²`);
+      tambahanText = arr.join(" + ");
+    }
+
+    let jumlahGabungan = "-";
+    if (item.kategori === "Industri" || item.kategori === "Pertanian") {
+      const unit = item.kategori === "Pertanian" ? "hektar" : "m²";
+      if (luasAsal > 0) jumlahGabungan = `${luasAsal.toLocaleString('ms-MY')} ${unit}`;
+    } else {
+      const totalTingkat = tingkatAsal + tambahanTingkat;
+      const totalLuas = luasAsal + tambahanLuas;
+      if (totalTingkat && totalLuas)
+        jumlahGabungan = `${totalTingkat} tingkat / ${totalLuas.toLocaleString('ms-MY')} m²`;
+      else if (totalTingkat) jumlahGabungan = `${totalTingkat} tingkat`;
+      else if (totalLuas) jumlahGabungan = `${totalLuas.toLocaleString('ms-MY')} m²`;
+    }
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${rowNumber++}</td>
+        <td>${kategoriPaparan}</td>
+        <td>${tambahanText}</td>
+        <td>${jumlahGabungan}</td>
+        <td>${permohonan.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+        <td>${pelan.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+        <td>${hms.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+        <td>${hmk.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+        <td>${jpu.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+        <td>${cukai.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+        <td>${jumlah.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="padamRekod(${index})">Padam</button></td>
+      </tr>`;
+
+    totals.permohonan += permohonan;
+    totals.pelan += pelan;
+    totals.hms += hms;
+    totals.hmk += hmk;
+    totals.jpu += jpu;
+    totals.cukai += cukai;
+    totals.jumlah += jumlah;
+  });
+
+  tbody.innerHTML += `
+    <tr class="table-warning fw-bold">
+      <td colspan="4" class="text-end">JUMLAH KESELURUHAN:</td>
+      <td>${totals.permohonan.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+      <td>${totals.pelan.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+      <td>${totals.hms.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+      <td>${totals.hmk.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+      <td>${totals.jpu.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+      <td>${totals.cukai.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+      <td>${totals.jumlah.toLocaleString('ms-MY', { style: 'currency', currency: 'MYR' })}</td>
+      <td></td>
+    </tr>`;
+}
+
+function padamRekod(index) {
+  const data = JSON.parse(localStorage.getItem("summaryData")) || [];
+  data.splice(index, 1);
+  localStorage.setItem("summaryData", JSON.stringify(data));
+  populateSummaryTable();
+}
+
+function duplicateLastRekod() {
+  const data = JSON.parse(localStorage.getItem("summaryData")) || [];
+  if (data.length > 0) {
+    const salinan = { ...data[data.length - 1] };
+    data.push(salinan);
+    localStorage.setItem("summaryData", JSON.stringify(data));
+    populateSummaryTable();
+  } else {
+    alert("Tiada data untuk digandakan.");
+  }
+}
+
+function resetRingkasan() {
+  if (confirm("Anda pasti mahu mengosongkan semua data ringkasan?")) {
+    localStorage.removeItem("summaryData");
+    populateSummaryTable();
+  }
+}
+
+async function muatTurunPDF() {
+  const tajuk = document.getElementById("tajukPdf").value.trim() || "KIRAAN PREMIUM";
+  const pelan = document.getElementById("pelanPraHitungan").value.trim();
+  const noFail = document.getElementById("noFail").value.trim();
+  const noPlot = document.getElementById("noPlot").value.trim();
+  const luas = document.getElementById("luasKeseluruhan").value.trim();
+  const mukim = document.getElementById("mukim").value.trim(); // Mengambil nilai dari select
+  const pemohon = document.getElementById("pemohon").value.trim();
+
+  const element = document.getElementById("summaryContent");
+  const canvas = await html2canvas(element, { scale: 2 });
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jspdf.jsPDF("l", "mm", "a4");
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const margin = 10;
+  const maxWidth = pageWidth - (2 * margin);
+  let currentY = 15;
+
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(14);
+  const tajukLines = pdf.splitTextToSize(tajuk, maxWidth);
+  tajukLines.forEach(line => {
+    pdf.text(line, margin, currentY);
+    currentY += 7;
+  });
+
+  pdf.setFont("helvetica", "normal");
+  currentY += 3;
+  pdf.setFontSize(12);
+
+  const details = [
+    `PELAN PRA-HITUNGAN NO. : ${pelan}`,
+    `NO. FAIL : ${noFail}`,
+    `NO. PLOT : ${noPlot}`,
+    `LUAS KESELURUHAN : ${luas}`,
+    `MUKIM : ${mukim}`,
+    `PEMOHON : ${pemohon}`
+  ];
+
+  details.forEach(detail => {
+    pdf.text(detail, margin, currentY);
+    currentY += 6;
+  });
+
+  currentY += 5;
+
+  const imgProps = pdf.getImageProperties(imgData);
+  const pdfWidth = maxWidth;
+  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+  pdf.addImage(imgData, "PNG", margin, currentY, pdfWidth, pdfHeight);
+  const fileName = tajuk.substring(0, 100).replace(/\s+/g, '_').toLowerCase() + ".pdf";
+  pdf.save(fileName);
+}
+
+document.addEventListener("DOMContentLoaded", populateSummaryTable);
+</script>
+
+</body>
+</html>
